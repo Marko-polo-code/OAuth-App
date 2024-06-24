@@ -62,7 +62,7 @@ app.get('/', (req, res) => {
   res.render('index', { user: req.user });
 })
 
-app.get('/account', (req, res) => {
+app.get('/account', ensureAuthenticated ,(req, res) => {
   res.render('account', { user: req.user });
 });
 
@@ -75,7 +75,11 @@ app.get('/logout', (req, res) => {
   res.redirect('/');
 });
 
+app.get('/auth/github', passport.authenticate('github', { scope: [ 'user:email' ] }));
 
+app.get('/auth/github/callback', passport.authenticate('github', { failureRedirect: '/login' }), (req, res) => {
+  res.redirect('/');
+});
 
 
 /*
@@ -87,3 +91,8 @@ app.listen(PORT, () => console.log(`Listening on ${PORT}`));
 /*
  * ensureAuthenticated Callback Function
 */
+
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) { return next(); }
+  res.redirect('/login')
+};
